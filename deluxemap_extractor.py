@@ -1,7 +1,7 @@
 import sys
 import os
 from ctypes import (LittleEndianStructure, 
-					c_char, c_float, c_int, c_ubyte, sizeof, c_short, c_int16, c_byte)
+					sizeof, c_short, c_int16, c_byte)
 
 from pyidtech3lib import BSP_READER as BSP
 from pyidtech3lib import Q3VFS, Import_Settings
@@ -52,6 +52,7 @@ def save_lightmap_tga(file_name, lightmap):
 			file.write(c_byte(lightmap.map[index*3 + 2]))
 			file.write(c_byte(lightmap.map[index*3 + 1]))
 			file.write(c_byte(lightmap.map[index*3	]))
+		file.write(b'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0')
 		file.write(b'TRUEVISION-XFILE.\0')
 
 
