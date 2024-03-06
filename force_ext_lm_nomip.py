@@ -57,23 +57,24 @@ def main():
 			)
 		]
 	
-	shader_file = vfs.get("{}q3map2_{}.shader".format(shader_path, map_name))
-	lines = shader_file.decode(encoding="latin-1").splitlines()
 	new_shader_file_lines = []
-	open_shader = 0
-	for line in lines:
-		if line.strip() in nomip_shader_names:
-			open_shader = 1
-			continue
-		if open_shader > 0 and line.strip().startswith("{"):
-			open_shader += 1
-			continue
-		if open_shader > 0 and line.strip().startswith("}"):
-			open_shader -= 1
-			continue
-		if open_shader > 0:
-			continue
-		new_shader_file_lines.append(line)
+	shader_file = vfs.get("{}q3map2_{}.shader".format(shader_path, map_name))
+	if shader_file is not None:
+		lines = shader_file.decode(encoding="latin-1").splitlines()
+		open_shader = 0
+		for line in lines:
+			if line.strip() in nomip_shader_names:
+				open_shader = 1
+				continue
+			if open_shader > 0 and line.strip().startswith("{"):
+				open_shader += 1
+				continue
+			if open_shader > 0 and line.strip().startswith("}"):
+				open_shader -= 1
+				continue
+			if open_shader > 0:
+				continue
+			new_shader_file_lines.append(line)
 
 	for id, shader_name in enumerate(nomip_shader_names):
 		first_external_lightmap_index = id * 8
@@ -81,7 +82,7 @@ def main():
 		external_lightmaps = bsp.external_lm_files[first_external_lightmap_index:last_external_lightmap_index]
 		new_shader_file_lines.append(shader_name)
 		new_shader_file_lines.append("{")
-		new_shader_file_lines.append("nomipmaps")
+		new_shader_file_lines.append("\tnomipmaps")
 		for lm in external_lightmaps:
 			new_shader_file_lines.append("\t{")
 			new_shader_file_lines.append("\t\tmap {}".format(lm))
@@ -120,6 +121,8 @@ def main():
 	except PermissionError:
 		print("Doesn't have permission to write to ", new_file_name)
 		print("Aborting")
+		input()
+		return
 
 	try:
 		new_file_name ="{}q3map2_{}.shader".format(base_path + shader_path, map_name)
@@ -131,6 +134,11 @@ def main():
 	except PermissionError:
 		print("Doesn't have permission to write to ", new_file_name)
 		print("Aborting")
+		input()
+		return
+
+	print("Finished successfully")
+	input()
 
 if __name__ == "__main__":
 	main()
