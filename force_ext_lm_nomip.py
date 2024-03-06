@@ -5,6 +5,7 @@ from math import ceil
 from pyidtech3lib import BSP_READER as BSP
 from pyidtech3lib import Q3VFS, Import_Settings
 
+LIGHTMAP_FORMATS = (".tga", ".png", ".jpg")
 
 def main():
 	try:
@@ -48,12 +49,23 @@ def main():
 		os.makedirs(base_path + shader_path)
 		print("Created new folder for the shader file:", base_path + shader_path)
 
-	print("External lightmaps:", bsp.external_lm_files)
+	reg_path = bsp.map_name + "/lm_[0-9]{4}"
+	for format in LIGHTMAP_FORMATS:
+		external_lm_files = vfs.search(reg_path + format)
+		if external_lm_files:
+			break
+	if len(external_lm_files) == 0:
+		print("No external shaders found")
+		print("Aborting")
+		input()
+		return
+
+	print("External lightmaps:", external_lm_files)
 	print("Shader path:", shader_path)
 
 	nomip_shader_names = [
 		"{}/force_nomip_{}".format(map_name, i) for i in range(
-			ceil(len(bsp.external_lm_files) / 8)
+			ceil(len(external_lm_files) / 8)
 			)
 		]
 	
@@ -78,8 +90,8 @@ def main():
 
 	for id, shader_name in enumerate(nomip_shader_names):
 		first_external_lightmap_index = id * 8
-		last_external_lightmap_index = min(len(bsp.external_lm_files), first_external_lightmap_index + 8)
-		external_lightmaps = bsp.external_lm_files[first_external_lightmap_index:last_external_lightmap_index]
+		last_external_lightmap_index = min(len(external_lm_files), first_external_lightmap_index + 8)
+		external_lightmaps = external_lm_files[first_external_lightmap_index:last_external_lightmap_index]
 		new_shader_file_lines.append(shader_name)
 		new_shader_file_lines.append("{")
 		new_shader_file_lines.append("\tnomipmaps")
@@ -95,6 +107,7 @@ def main():
 		if len(shader_name) > 62:
 			print("Shader name would be bigger than 63 chars. Shortening the bsp file name might help.")
 			print("Aborting")
+			input()
 			return
 		new_shader = bsp.lump_info["shaders"]()
 		new_shader.name = bytes(shader_name, "latin-1")
@@ -108,6 +121,10 @@ def main():
 		leaf.face += len(new_surface_lump)
 	for model in bsp.lumps["models"]:
 		model.face += len(new_surface_lump)
+
+	if hasattr(bsp.lumps["brushsides"][0], "face"):
+		for side in bsp.lumps["brushsides"]:
+			side.face += len(new_surface_lump)
 
 	bsp.lumps["surfaces"] = new_surface_lump + bsp.lumps["surfaces"]
 
