@@ -12,7 +12,7 @@ a = Analysis(
 		('pyidtech3lib', 'pyidtech3lib/')
 		],
     hiddenimports=[
-		'numpy',
+		# 'numpy',
 		'ctypes'
 		],
     hookspath=[],
