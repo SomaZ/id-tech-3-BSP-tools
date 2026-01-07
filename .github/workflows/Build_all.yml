@@ -30,6 +30,7 @@ jobs:
           python -m PyInstaller force_ext_lm_nomip.spec
           python -m PyInstaller deluxemap_extractor.spec
           python -m PyInstaller fakk2alice.spec
+          python -m PyInstaller raven_ext_lm.spec
       - uses: actions/upload-artifact@v4
         with:
           name: Windows Force nomip external lightmaps
@@ -42,6 +43,10 @@ jobs:
         with:
           name: Windows fakk2alice
           path: 'dist/fakk2alice.exe'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Windows Raven external lightmaps
+          path: 'dist/raven_ext_lm.exe'
 
       - name: Create release
         id: create_release
@@ -80,4 +85,14 @@ jobs:
           upload_url: ${{steps.create_release.outputs.upload_url}}
           asset_path: 'dist/fakk2alice.exe'
           asset_name: fakk2alice.exe
+          asset_content_type: application/zip
+      - name: Upload Release Asset
+        id: upload-release-asset-raven_ext
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{steps.create_release.outputs.upload_url}}
+          asset_path: 'dist/raven_ext_lm.exe'
+          asset_name: raven_ext_lm.exe
           asset_content_type: application/zip
